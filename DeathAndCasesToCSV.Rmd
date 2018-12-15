@@ -1,0 +1,129 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+
+
+
+```{r}
+library(readxl)
+library(stringr)
+library(dplyr)
+library(lubridate)
+library(reshape2)
+```
+
+```{r}
+install.packages("reshape2")
+```
+
+```{r}
+
+
+# read excel sheets
+sheets <- readxl::excel_sheets("MOH_denggue_mortality_2010_2015(2).xlsx")
+lst <- lapply(sheets, function(sheet) 
+  readxl::read_excel("MOH_denggue_mortality_2010_2015(2).xlsx", sheet = sheet, skip = 2)
+)
+names(lst) <- sheets
+
+# shove them into global environment
+list2env(lst, envir = .GlobalEnv)
+```
+
+```{r}
+`Kes 2010`$year<-2010
+`Kes 2011`$year<-2011
+`Kes 2012`$year<-2012
+`Kes 2013`$year<-2013
+`Kes 2014`$year<-2014
+`Kes 2015`$year<-2015
+
+
+`Kes Kematian 2010`$year<-2010
+`Kes Kematian 2011`$year<-2011
+`Kes Kematian 2012`$year<-2012
+
+`Kes Kematian 2014`$year<-2014
+`Kes Kematian 2015`$year<-2015
+
+colnames(`Kes Kematian 2013`)=`Kes Kematian 2013`[1,]
+`Kes Kematian 2013`=`Kes Kematian 2013`[-1,]
+names(`Kes Kematian 2013`)[54]<-"JUMLAH"
+
+`Kes Kematian 2013`$year<-2013
+```
+
+
+
+```{r}
+MOH_denggue_HOTSPOT_2010_2014_v3_2_ <- read_excel("MOH_denggue_HOTSPOT_2010_2014_v3(2).xlsx", 
+    sheet = "HOT SPOTS", range = "E2:H9859")
+```
+
+```{r}
+library(readr)
+rainfall_by_state <- read_csv("rainfall_by_week.csv")
+str(rainfall_by_state)
+```
+
+```{r}
+kesdengue=rbind.data.frame(`Kes 2010`,`Kes 2011`,`Kes 2012`,`Kes 2013`,`Kes 2014`,`Kes 2015`,stringsAsFactors = F)
+
+
+```
+
+```{r}
+names(`Kes Kematian 2012`)<-names(`Kes Kematian 2011`)
+names(`Kes Kematian 2013`)<-names(`Kes Kematian 2011`)
+names(`Kes Kematian 2014`)<-names(`Kes Kematian 2011`)
+names(`Kes Kematian 2015`)<-names(`Kes Kematian 2011`)
+names(`Kes Kematian 2010`)<-names(`Kes Kematian 2011`)
+kesdeath=rbind.data.frame(`Kes Kematian 2010`,
+                          `Kes Kematian 2011`,
+                          `Kes Kematian 2012`,
+                          `Kes Kematian 2013`,
+                          `Kes Kematian 2014`,
+                          `Kes Kematian 2015`
+                          ,stringsAsFactors = F)
+
+```
+
+```{r}
+x<-melt(kesdengue,id.vars = c("NEGERI", "year"))
+y<-melt(kesdeath,id.vars = c("NEGERI", "year"))
+```
+
+```{r}
+xT<-x[!grepl("JUMLAH", x$variable),]
+xT$variable<-gsub("Minggu","",xT$variable)
+names(xT)[3]<-"week"
+names(xT)[4]<-"No_of_dengue_case"
+dengue_kes_by_state_week<-xT
+
+write.csv(dengue_kes_by_state_week,file ="dengue_kes_by_state_week.csv" ,row.names = F, na=" ")
+
+```
+
+```{r}
+yT<-y[!grepl("JUMLAH", y$variable),]
+yT$variable<-gsub("Minggu","",yT$variable)
+names(yT)[3]<-"week"
+names(yT)[4]<-"No_of_dengue_case"
+dengue_death_by_state_week<-yT
+
+write.csv(dengue_death_by_state_week,file ="dengue_death_by_state_week.csv" ,row.names = F)
+```
+
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
